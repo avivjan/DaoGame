@@ -2,6 +2,11 @@ package com.dao.game;
 
 import java.io.ObjectInputStream.GetField;
 import java.lang.StackWalker.Option;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+import javax.management.loading.PrivateClassLoader;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -11,14 +16,19 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.AddAction;
+import com.badlogic.gdx.scenes.scene2d.actions.RunnableAction;
+import com.badlogic.gdx.scenes.scene2d.actions.SequenceAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
+
+
 
 public class DaoGame extends ApplicationAdapter 
 {
@@ -26,6 +36,7 @@ public class DaoGame extends ApplicationAdapter
 	private Cell[][] board = new Cell[4][4];
 	private Piece selecedPiece;
 	private Stage stage;
+	private List<Piece> computerPieces;
 	
 	final private int squaresOnWidth = 4;
 	final private int squaresOnHeight = 4;
@@ -36,6 +47,7 @@ public class DaoGame extends ApplicationAdapter
 	@Override
 	public void create () {
 		movementManager = new MovementManager();
+		computerPieces = new ArrayList<Piece>();
 		stage = new Stage(new StretchViewport(960, 960));
 		Gdx.input.setInputProcessor(stage);
 		stage.addActor(new Board());
@@ -117,8 +129,12 @@ public class DaoGame extends ApplicationAdapter
 	}
 	public void deletePeiceOnSelecedCell() 
 	{	
-		Cordinate selectedLoc = selecedPiece.getLocation();
-		board[selectedLoc.getX()][selectedLoc.getY()].deletePeiceOnIt();
+		if (selecedPiece != null)
+		{ 
+			Cordinate selectedLoc = selecedPiece.getLocation();
+			board[selectedLoc.getX()][selectedLoc.getY()].deletePeiceOnIt();
+		}
+		
 	}
 	
 	public void MarkAllCellsAsNonOption() throws Exception
@@ -142,6 +158,11 @@ public class DaoGame extends ApplicationAdapter
 			selecedPiece.Deselect();
 			SetSelectedToNull();
 		}
+	}
+	public void deletePieceFromCell(Piece piece)
+	{
+		Cordinate cordinate = piece.getLocation();
+		board[cordinate.getX()][cordinate.getY()].deletePeiceOnIt();
 	}
 	
 
@@ -172,6 +193,7 @@ public class DaoGame extends ApplicationAdapter
 					stage.addActor(cell);
 					addCellListener(cell);
 					board[i][j] = cell;
+					computerPieces.add(piece);
 					continue;
 				}
 				Cell cell = new Cell(cor, null);
@@ -181,10 +203,14 @@ public class DaoGame extends ApplicationAdapter
 			}
 		}
 	}
-	
-	private void addCellListener(Cell cell)
+	private <T> T get(List<T> list)
 	{
-		
+		System.out.println(new Random().nextInt(list.size()));
+		return list.get(new Random().nextInt(list.size()));
+	}
+	
+	private void addCellListener(Cell cell) 
+	{	
 		cell.addListener(new InputListener()
 		{
 			public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) 
@@ -197,7 +223,8 @@ public class DaoGame extends ApplicationAdapter
 					{
 						if (pressedCell.isOption())
 						{
-							movementManager.move(selecedPiece, pressedCell);
+							movementManager.move(selecedPiece, pressedCell, 0.1f);
+							computerPlay();
 						}
 						return true;
 					}
@@ -223,12 +250,18 @@ public class DaoGame extends ApplicationAdapter
 				} 
 				catch (Exception e)
 				{
+					System.err.println("Error in touchDown");
+					e.printStackTrace();
 					return true;
 				}
 				
-			}
-		}
-		);
+			}});
+	}
+	private void computerPlay() throws Exception
+	{
+	    Piece computerPiece = get(computerPieces);
+	    Cordinate targetcorCordinate = get(movementManager.getOptionalCordinatesForMovment(computerPiece));
+	    movementManager.move(computerPiece, board[targetcorCordinate.getX()][targetcorCordinate.getY()], 1);
 	}
 	
 	

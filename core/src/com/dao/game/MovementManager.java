@@ -18,21 +18,19 @@ import com.badlogic.gdx.scenes.scene2d.actions.AddAction;
 public class MovementManager 
 {
 	private DaoGame daoGame;
-	private float timeToReach = 0.1f;
 	
 	public MovementManager()
 	{
 		daoGame = (DaoGame)Gdx.app.getApplicationListener();
 	}
 	
-	public void move(Piece piece, Cell destinationCell) throws Exception
+	public void move(Piece piece, Cell destinationCell, float time) throws Exception
 	{
-		piece.addAction(Actions.moveTo(destinationCell.getCordinate().getPixelsToPutOn().getX(),destinationCell.getCordinate().getPixelsToPutOn().getY(), timeToReach));
-		daoGame.deletePeiceOnSelecedCell();
+		piece.addAction(Actions.moveTo(destinationCell.getCordinate().getPixelsToPutOn().getX(),destinationCell.getCordinate().getPixelsToPutOn().getY(), time));
+		daoGame.deletePieceFromCell(piece);
 		piece.setCordinate(destinationCell.getCordinate());
 		daoGame.deleteSelectedIfExist();
 		destinationCell.putPieceOnIt(piece);
-
 	}
 	
 	
