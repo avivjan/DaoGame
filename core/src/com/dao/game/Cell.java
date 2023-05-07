@@ -5,15 +5,20 @@ import java.io.ObjectInputStream.GetField;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.actions.AddAction;
 
-public class Cell 
+public class Cell extends Actor
 {
 	private Cordinate cordinate;
 	private Piece pieceOnIt;
 	private Texture optionImage;
-	private Rectangle optionObject;
+	private float width = 230;
+	private float height = 230;
 	private boolean isOption;
 
 	public Cell(Cordinate cor, Piece piece)
@@ -22,17 +27,19 @@ public class Cell
 		isOption = false;
 		pieceOnIt = piece;
 		optionImage = new Texture("4grey.png");
-		optionObject = new Rectangle();
-		LocationInPixels pixelsToPutOn = cor.getPixelsToPutOn();
-		optionObject.width = 230;
-		optionObject.height = 230;
-		optionObject.x = pixelsToPutOn.getX();
-		optionObject.y = pixelsToPutOn.getY();
+		this.setBounds(cor.getPixelsToPutOn().getX(), cor.getPixelsToPutOn().getY(), width, height);
+		
+	}
+	@Override
+	public void draw(Batch batch, float parentAlpha)
+	{
+		if (isOption)
+		{
+			batch.draw(optionImage, cordinate.getPixelsToPutOn().getX(), cordinate.getPixelsToPutOn().getY(), width, height);
+		}
 	}
 	
-	public Rectangle getOptionObject() {
-		return optionObject;
-	}
+
 	public Texture getOptionImage()
 	{
 		return optionImage;

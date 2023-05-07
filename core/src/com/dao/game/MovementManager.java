@@ -8,43 +8,28 @@ import java.util.List;
 import javax.swing.ListModel;
 import javax.xml.stream.events.StartDocument;
 
+import org.w3c.dom.TypeInfo;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.actions.AddAction;
 
 public class MovementManager 
 {
 	private DaoGame daoGame;
-	private MovingDetails movingDetails;
 	
 	public MovementManager()
 	{
 		daoGame = (DaoGame)Gdx.app.getApplicationListener();
 	}
 	
-	public boolean isMoving()
+	public void move(Piece piece, Cell destinationCell)
 	{
-		return movingDetails != null;
+		
 	}
-	
-	private MovingDetails createMovingDetails(Piece pieceToMove)
-	{
-		return null;
-	}
-	//public void StartMoving(Piece piece) throws Exception
-	//{
-	//	if (isMoving()) { throw new Exception("We are already moving");}
-	//	movingDetails = createMovingDetails();
-			
-			
-	//	if (reached)
-	//	{
-				
-	//	}
-	//}
+
 
 	public List<Cordinate> getOptionalCordinatesForMovment(Piece piece) 
 	{
-		System.out.println("getOptional With piece " + piece.getLocation());
 		List<Cordinate> optionalCordinatesForMovment = new ArrayList<Cordinate>();
 		Cordinate locationCordinate = piece.getLocation();
 		for (int xDirection = -1; xDirection <= 1; xDirection++) //  -1, 0, 1
@@ -69,10 +54,6 @@ public class MovementManager
 					optionalCordinatesForMovment.add(new Cordinate(xCordinateBeingChecked, yCordinateBeingChecked));
 				}
 			}	
-		}
-		for(Cordinate cordinate: optionalCordinatesForMovment)
-		{
-			System.out.println("option: " + cordinate);
 		}
 		return optionalCordinatesForMovment;
 		

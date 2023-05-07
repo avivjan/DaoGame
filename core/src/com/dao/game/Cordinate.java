@@ -36,9 +36,6 @@ public class Cordinate
 	
 	public LocationInPixels getPixelsToPutOn()
 	{
-		System.err.println("cordinate: " + this + "printed: " + daoGame.getPixelsOnWidth() / daoGame.getSquaresOnWidth() * this.getX()+ ", "
-							+ daoGame.getPixelsOnHeight() / daoGame.getSquaresOnHeight() * (3 - this.getY()));
-		
 		return new LocationInPixels(daoGame.getPixelsOnWidth() / daoGame.getSquaresOnWidth() * this.getX(),
 									daoGame.getPixelsOnHeight() / daoGame.getSquaresOnHeight() * (3 - this.getY()));
 		

@@ -5,22 +5,27 @@ import java.lang.StackWalker.Option;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.actions.AddAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.badlogic.gdx.utils.viewport.StretchViewport;
 
 public class DaoGame extends ApplicationAdapter 
 {
-	private OrthographicCamera camera;
-	private SpriteBatch batch;
-	private Sprite boardBackground;
 	private MovementManager movementManager;
 	private Cell[][] board = new Cell[4][4];
 	private Piece selecedPiece;
+	private Stage stage;
 	
 	final private int squaresOnWidth = 4;
 	final private int squaresOnHeight = 4;
@@ -34,13 +39,16 @@ public class DaoGame extends ApplicationAdapter
 	
 	@Override
 	public void create () {
-		batch = new SpriteBatch();
-		camera = new OrthographicCamera();
-		boardBackground = new Sprite(new Texture("Board4x4.png"));
-		camera.setToOrtho(false, 960, 960);	
 		movementManager = new MovementManager();
+		stage = new Stage(new StretchViewport(960, 960));
+		Gdx.input.setInputProcessor(stage);
+		stage.addActor(new Board());
 		
 		CreateCellsWithPieces();
+	}
+	@Override
+	public void resize(int width, int height) {
+		stage.getViewport().update(width, height, true);
 	}
 
 	@Override
@@ -48,16 +56,11 @@ public class DaoGame extends ApplicationAdapter
 	{
 		try 
 		{
-			camera.update();
 			ScreenUtils.clear(255, 255, 255, 1);
-			batch.setProjectionMatrix(camera.combined);
-			if (Gdx.input.isTouched())
-			{ 
-				handleClick(new LocationInPixels(Gdx.input.getX(), Gdx.input.getY()));//In getY the origin is top!
-			}
-			batch.begin(); 
-			draw();
-			batch.end();
+			float delta = Gdx.graphics.getDeltaTime();
+			Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+			stage.act(delta);
+			stage.draw();
 			
 		}
 		catch (Exception e) 
@@ -70,9 +73,18 @@ public class DaoGame extends ApplicationAdapter
 	
 	@Override
 	public void dispose () {
-		batch.dispose();
+		
+		stage.dispose();
 	}
-
+	public void deleteSelected() 
+	{
+		selecedPiece = null;
+	}
+	public void addSelected(Piece piece)
+	{
+		selecedPiece = piece;
+		
+	}
 	
 	public int getPixelsOnHeight() {
 		return pixelsOnHeight;
@@ -132,85 +144,86 @@ public class DaoGame extends ApplicationAdapter
 				Cordinate cor = new Cordinate(i, j);
 				if (i == j)
 				{
-					board[i][j] = new Cell(cor, new Piece(cor, true));
+					Piece piece = new Piece(cor, true);
+					Cell cell = new Cell(cor, piece);
+					stage.addActor(piece);
+					stage.addActor(cell);
+					addCellListener(cell);
+					board[i][j] = cell;
 					continue;
-					
 				}
 				
 				if (i + j == 3)
 				{
-					board[i][j] = new Cell(cor, new Piece(cor, false));
+					Piece piece = new Piece(cor, false);
+					Cell cell = new Cell(cor, piece);
+					stage.addActor(piece);
+					stage.addActor(cell);
+					addCellListener(cell);
+					board[i][j] = cell;
 					continue;
 				}
-				board[i][j] = new Cell(cor, null);
+				Cell cell = new Cell(cor, null);
+				board[i][j] = cell;
+				stage.addActor(cell);
+				addCellListener(cell);
 			}
 		}
 	}
-	private void draw()
-	{
-		batch.draw(boardBackground, 0, 0,pixelsOnWidth, pixelsOnHeight);
-		drawAllpieces();
-	}
 	
-	private void handleClick(LocationInPixels locationOfClick) throws Exception
+	private void addCellListener(Cell cell)
 	{
-		Cordinate clickCordinate =  locationOfClick.GetCordinate();
-		Cell pressedCell = board[clickCordinate.getX()][clickCordinate.getY()];
-		//if (pressedCell.isEmpty())
-		//{
-		//	if (pressedCell.isOption())
-		//	{
-				//Move
-		//	}
-		//	return;
-		//}
 		
-		if (pressedCell.isEmpty())//TODO: Delete!!
+		cell.addListener(new InputListener()
 		{
-			return;
-		}
-		
-		if (pressedCell.getPieceOnIt().isSelected())
-		{
-			pressedCell.getPieceOnIt().Deselect();
-			return;
-		}
-		
-		if (pressedCell.getPieceOnIt().isHumanPiece())
-		{
-			if (selecedPiece != null)
+			public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) 
 			{
-				selecedPiece.Deselect();
-			}
-			pressedCell.getPieceOnIt().select();
-			
-		}	
-	}
-	
-	private void drawAllpieces()
-	{
-		for (int i = 0; i < 4; i++)
-		{
-			for (int j = 0; j < 4; j++)
-			{
-				if (!isEmptyCell(new Cordinate(i,j)))
+				try 
 				{
-					Piece pieceOnThisCell = board[i][j].getPieceOnIt();
-					Rectangle recOfPieceOnThisCell = pieceOnThisCell.getRectangle();
-					batch.draw(pieceOnThisCell.getImage(), recOfPieceOnThisCell.x, recOfPieceOnThisCell.y, recOfPieceOnThisCell.width ,recOfPieceOnThisCell.height);
-				}
-				if (board[i][j].isOption())
+					Cell pressedCell = (Cell)event.getListenerActor();
+					
+					//if (pressedCell.isEmpty())
+					//{
+					//	if (pressedCell.isOption())
+					//	{
+							//Move
+					//	}
+					//	return;
+					//}
+					
+					if (pressedCell.isEmpty())//TODO: Delete!!
+					{
+						return true;
+					}
+					
+					if (pressedCell.getPieceOnIt().isSelected())
+					{
+						pressedCell.getPieceOnIt().Deselect();
+						return true;
+					}
+					
+					if (pressedCell.getPieceOnIt().isHumanPiece())
+					{
+						if (selecedPiece != null)
+						{
+							selecedPiece.Deselect();
+						}
+						pressedCell.getPieceOnIt().select();
+						return true;
+						
+					}	
+					return true;
+					
+				} 
+				catch (Exception e)
 				{
-					Rectangle  optionObject = board[i][j].getOptionObject();
-					batch.draw(board[i][j].getOptionImage(), optionObject.x, optionObject.y, optionObject.width ,optionObject.height);
+					return true;
 				}
 				
 			}
 		}
-		
+		);
 	}
+	
 
-	
-	
-	
 }
