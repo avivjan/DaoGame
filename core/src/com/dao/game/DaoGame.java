@@ -32,18 +32,13 @@ public class DaoGame extends ApplicationAdapter
 	final private int pixelsOnWidth = 960;
 	final private int pixelsOnHeight = 960;
 	
-	
-	
 
-
-	
 	@Override
 	public void create () {
 		movementManager = new MovementManager();
 		stage = new Stage(new StretchViewport(960, 960));
 		Gdx.input.setInputProcessor(stage);
 		stage.addActor(new Board());
-		
 		CreateCellsWithPieces();
 	}
 	@Override
@@ -76,7 +71,8 @@ public class DaoGame extends ApplicationAdapter
 		
 		stage.dispose();
 	}
-	public void deleteSelected() 
+	
+	public void SetSelectedToNull() 
 	{
 		selecedPiece = null;
 	}
@@ -119,6 +115,12 @@ public class DaoGame extends ApplicationAdapter
 		board[cordinate.getX()][cordinate.getY()].markAsOption();
 		
 	}
+	public void deletePeiceOnSelecedCell() 
+	{	
+		Cordinate selectedLoc = selecedPiece.getLocation();
+		board[selectedLoc.getX()][selectedLoc.getY()].deletePeiceOnIt();
+	}
+	
 	public void MarkAllCellsAsNonOption() throws Exception
 	{
 		for (int i = 0; i < 4; i++)
@@ -133,6 +135,15 @@ public class DaoGame extends ApplicationAdapter
 		}
 				
 	}
+	public void deleteSelectedIfExist() throws Exception
+	{
+		if (selecedPiece != null)
+		{ 
+			selecedPiece.Deselect();
+			SetSelectedToNull();
+		}
+	}
+	
 
 
 	private void CreateCellsWithPieces()
@@ -182,17 +193,12 @@ public class DaoGame extends ApplicationAdapter
 				{
 					Cell pressedCell = (Cell)event.getListenerActor();
 					
-					//if (pressedCell.isEmpty())
-					//{
-					//	if (pressedCell.isOption())
-					//	{
-							//Move
-					//	}
-					//	return;
-					//}
-					
-					if (pressedCell.isEmpty())//TODO: Delete!!
+					if (pressedCell.isEmpty())
 					{
+						if (pressedCell.isOption())
+						{
+							movementManager.move(selecedPiece, pressedCell);
+						}
 						return true;
 					}
 					
@@ -224,6 +230,7 @@ public class DaoGame extends ApplicationAdapter
 		}
 		);
 	}
+	
 	
 
 }

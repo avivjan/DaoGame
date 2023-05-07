@@ -2,6 +2,7 @@ package com.dao.game;
 
 
 import java.io.ObjectInputStream.GetField;
+import java.util.concurrent.ExecutionException;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
@@ -24,6 +25,8 @@ public class Cell extends Actor
 	public Cell(Cordinate cor, Piece piece)
 	{
 		this.cordinate = cor;
+		super.setX(cor.getX());
+		super.setY(cor.getY());
 		isOption = false;
 		pieceOnIt = piece;
 		optionImage = new Texture("4grey.png");
@@ -35,7 +38,7 @@ public class Cell extends Actor
 	{
 		if (isOption)
 		{
-			batch.draw(optionImage, cordinate.getPixelsToPutOn().getX(), cordinate.getPixelsToPutOn().getY(), width, height);
+			batch.draw(optionImage, getX(), getY(), width, height);
 		}
 	}
 	
@@ -75,5 +78,18 @@ public class Cell extends Actor
 	}
 	public boolean isOption() {
 		return isOption;
+	}
+	
+	public void putPieceOnIt(Piece piece) throws Exception 
+	{
+		if (!isEmpty())
+		{
+			throw new Exception("You cannot put Piece cell :" + cordinate + "because it is occupaied with piece with id: " + pieceOnIt.getId());
+		}
+		pieceOnIt = piece;
+
+	}
+	public void deletePeiceOnIt() {
+		pieceOnIt = null;
 	}
 }

@@ -11,10 +11,11 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 
 public class Piece extends Actor
 {
-	private Cordinate location;
+	private Cordinate cordinate;
 	private boolean isHumanPiece;
 	private boolean isSelected;
 	private int id;
@@ -30,7 +31,9 @@ public class Piece extends Actor
 	
 	public Piece(Cordinate cor, boolean _isHumanPiece) 
 	{	
-		location = cor;
+		super.setX(cor.getPixelsToPutOn().getX());
+		super.setY(cor.getPixelsToPutOn().getY());
+		cordinate = cor;
 		isHumanPiece = _isHumanPiece;
 		isSelected = false;
 		id = ++counter;
@@ -49,14 +52,13 @@ public class Piece extends Actor
 	@Override
 	public void draw(Batch batch, float parentAlpha) 
 	{
-		batch.draw(image, location.getPixelsToPutOn().getX(), location.getPixelsToPutOn().getY(), width , height);
-		
+		batch.draw(image, super.getX(), super.getY(), width , height);
 	}
 	public int getId() {
 		return id;
 	}
 	public Cordinate getLocation() {
-		return new Cordinate(location);
+		return new Cordinate(cordinate);
 	}
 	public Texture getImage() {
 		return image;
@@ -66,6 +68,10 @@ public class Piece extends Actor
 	}
 	public boolean isHumanPiece() {
 		return isHumanPiece;
+	}
+	public void setCordinate(Cordinate cordinate)
+	{
+		this.cordinate = cordinate;
 	}
 	
 	public void select() throws Exception
@@ -87,17 +93,6 @@ public class Piece extends Actor
 		if (!isHumanPiece) {throw new Exception("You cannot Deselect a non-Human piece");}
 		daoGame.MarkAllCellsAsNonOption();
 		isSelected = false;
-		daoGame.deleteSelected();
+		daoGame.SetSelectedToNull();
 	}
-	//public void goToCell(Cell cell) throws Exception
-	//{
-	//	if (!cell.isEmpty())
-	//	{
-	//		throw new Exception("This piece (id = " + this.getId() + ") cannot go to cell: " + cell.getCordinate() +
-	//							"because it is already occupied with piece " +cell.getPieceOnIt().getId());
-	//	}
-		
-		
-		
-	//}
 }

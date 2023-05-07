@@ -6,28 +6,37 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.ListModel;
+import javax.swing.text.html.HTMLDocument.HTMLReader.IsindexAction;
 import javax.xml.stream.events.StartDocument;
 
 import org.w3c.dom.TypeInfo;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.AddAction;
 
 public class MovementManager 
 {
 	private DaoGame daoGame;
+	private float timeToReach = 0.1f;
 	
 	public MovementManager()
 	{
 		daoGame = (DaoGame)Gdx.app.getApplicationListener();
 	}
 	
-	public void move(Piece piece, Cell destinationCell)
+	public void move(Piece piece, Cell destinationCell) throws Exception
 	{
-		
+		piece.addAction(Actions.moveTo(destinationCell.getCordinate().getPixelsToPutOn().getX(),destinationCell.getCordinate().getPixelsToPutOn().getY(), timeToReach));
+		daoGame.deletePeiceOnSelecedCell();
+		piece.setCordinate(destinationCell.getCordinate());
+		daoGame.deleteSelectedIfExist();
+		destinationCell.putPieceOnIt(piece);
+
 	}
-
-
+	
+	
+	
 	public List<Cordinate> getOptionalCordinatesForMovment(Piece piece) 
 	{
 		List<Cordinate> optionalCordinatesForMovment = new ArrayList<Cordinate>();
