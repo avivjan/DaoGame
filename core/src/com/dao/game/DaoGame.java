@@ -230,6 +230,7 @@ public class DaoGame extends ApplicationAdapter
 							if(checkHumanWin())
 							{
 								stage.addActor(new WinSign());
+								return true;
 							}
 							computerPlay();
 							if(checkComputerWin())
